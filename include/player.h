@@ -16,7 +16,6 @@ class Player
         bool isHostile{false};
     };
     Player(PlayerOpts &opts);
-    Player();
 
     std::string m_name;
     int m_x;

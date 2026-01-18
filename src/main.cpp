@@ -10,9 +10,7 @@ int main()
     Player::PlayerOpts opponentOpts = {"Michel", 19, 9, 1, false};
     Player opponent(opponentOpts);
 
-    Player env;
-
-    Board::BoardOpts boardOpts = {20, 10, player, opponent, env};
+    Board::BoardOpts boardOpts = {20, 10, player, opponent};
     Board board(boardOpts);
 
     board.prettyPrint();

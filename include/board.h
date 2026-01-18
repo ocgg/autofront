@@ -17,7 +17,6 @@ class Board
         int height{0};
         Player &player;
         Player &opponent;
-        Player &env;
     };
     // Constructor
     Board(BoardOpts &opts);
@@ -40,7 +39,6 @@ class Board
     int m_height{0};
     Player &m_player;
     Player &m_opponent;
-    Player &m_env;
 
     void makeGrid();
 };

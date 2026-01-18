@@ -5,7 +5,7 @@
 #include <iostream>
 
 // Constructor
-Board::Board(BoardOpts &opts) : m_player(opts.player), m_opponent(opts.opponent), m_env(opts.env)
+Board::Board(BoardOpts &opts) : m_player(opts.player), m_opponent(opts.opponent)
 {
     m_width = opts.width;
     m_height = opts.height;
