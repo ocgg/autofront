@@ -5,7 +5,7 @@ TARGET = autofront
 CXX = g++
 
 # Standard & compilation opts
-CXXFLAGS = -std=c++20 -Wall -Wextra -Iinclude
+CXXFLAGS = -std=c++20 -Wall -Wextra -Iinclude -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
 # Folders
 SRC_DIR = src

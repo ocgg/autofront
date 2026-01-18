@@ -1,2 +1,5 @@
 build/
 ocgg/
+.cache/
+autofront
+compile_commands.json

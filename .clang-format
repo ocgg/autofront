@@ -1,0 +1,44 @@
+# Base solide, largement utilisée dans l’écosystème C++
+BasedOnStyle: LLVM
+
+# Indentation & largeur
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ColumnLimit: 100
+
+# Braces — K&R / 1TBS
+BreakBeforeBraces: Allman
+
+# Espaces
+SpaceBeforeParens: ControlStatements
+SpacesInParentheses: false
+SpaceAfterCStyleCast: false
+SpacesInAngles: false
+
+# Pointeurs & références (C++ moderne)
+PointerAlignment: Right           # int* p;
+ReferenceAlignment: Right         # int& r;
+
+# Alignements lisibles
+AlignAfterOpenBracket: Align
+AlignOperands: Align
+AlignTrailingComments: true
+
+# Initialisation & listes
+Cpp11BracedListStyle: true
+
+# Retour à la ligne intelligents
+AllowShortIfStatementsOnASingleLine: true
+AllowShortLoopsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: Inline
+
+# Switch / case
+IndentCaseLabels: false
+
+# Includes
+SortIncludes: true
+IncludeBlocks: Regroup
+
+# Commentaires
+ReflowComments: true
