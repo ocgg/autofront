@@ -11,32 +11,53 @@ int main()
     // Initialize random number generator
     srand(time(0));
 
-    Player::PlayerOpts playerOpts = {"Bobby", 0, 0, 1, false, colors::green, 70};
+    Player::PlayerOpts playerOpts = {"Bobby", 0, 0, 1, false, colors::green, 4};
     Player player(playerOpts);
 
-    Player::PlayerOpts opponentOpts = {"Michel", 19, 9, 1, false, colors::red, 30};
+    Player::PlayerOpts opponentOpts = {"Michel", 99, 39, 1, false, colors::red, 1};
     Player opponent(opponentOpts);
 
-    Board::BoardOpts boardOpts = {20, 10, player, opponent};
+    Board::BoardOpts boardOpts = {100, 40, player, opponent};
     Board board(boardOpts);
 
     board.prettyPrint();
 
-    std::cout << "\nInitial stats:\n";
-    std::cout << player.getName() << " cells: " << player.getCells().size()
-              << " (expansion: " << player.getExpansionScore() << "%)\n";
-    std::cout << opponent.getName() << " cells: " << opponent.getCells().size()
-              << " (expansion: " << opponent.getExpansionScore() << "%)\n";
+    // Board starts at line 1 (top of terminal)
+    int boardStartLine = 1;
 
-    for (int i = 1; i <= 100; ++i)
+    // Hide cursor for smooth animation
+    std::cout << "\x1b[?25l";
+
+    while (true)
     {
-        std::cout << "\n=== Turn " << i << " ===\n";
+        // Position cursor to board start
+        std::cout << "\x1b[" << boardStartLine << ";1H";
+
+        // Clear only the board area without scrolling
+        for (int j = 0; j < boardOpts.height; j++)
+        {
+            std::cout << "\x1b[K"; // Clear current line
+            if (j < boardOpts.height - 1)
+            {
+                std::cout << "\x1b[1B"; // Move down one line (no newline)
+            }
+        }
+
+        // Position cursor back to board start and display new board
+        std::cout << "\x1b[" << boardStartLine << ";1H";
         board.nextStep();
         board.prettyPrint();
+
         if (board.gameIsFinished()) break;
+
+        // Wait 50ms for smooth animation
+        usleep(50000);
     }
 
-    std::cout << board.getWinner()->getName() << "a gagné !" << '\n';
+    // Show cursor again
+    std::cout << "\x1b[?25h";
+
+    std::cout << board.getWinner()->getName() << " a gagné !" << '\n';
 
     return 0;
 }
