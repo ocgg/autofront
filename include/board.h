@@ -1,11 +1,9 @@
 #ifndef BOARD_H
 #define BOARD_H
 
-#include "colors.h"
+#include "cell.h"
 #include "player.h"
 
-#include <optional>
-#include <string>
 #include <vector>
 
 class Board
@@ -24,15 +22,11 @@ class Board
     void nextStep();
     // (for debugging) displays the board in terminal
     void prettyPrint();
+    // Returns all boundary cells (neighbors of player's cells that don't belong to player, without
+    // duplicates)
+    std::vector<Cell *> getBoundaryCells(Player &player);
 
   private:
-    struct Cell
-    {
-        std::string color{"background"};
-        std::string escapeCode{colors::black};
-        std::optional<Player> owner;
-    };
-
     // 2-dimensional array of Cells (vector of vectors of Cells)
     std::vector<std::vector<Cell>> m_grid;
     int m_width{0};
@@ -41,6 +35,11 @@ class Board
     Player &m_opponent;
 
     void makeGrid();
+    void place(Player &player);
+    // Process one player's turn with probabilistic conquest
+    void processPlayerTurn(Player &player);
+    // Rebuild player's cell list from the grid
+    void rebuildPlayerCells(Player &player);
 };
 
 #endif

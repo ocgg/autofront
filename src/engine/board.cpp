@@ -2,15 +2,17 @@
 
 #include "colors.h"
 
+#include <cstdlib>
+#include <ctime>
 #include <iostream>
+#include <optional>
+#include <set>
 
 // Constructor
 Board::Board(BoardOpts &opts) : m_player(opts.player), m_opponent(opts.opponent)
 {
     m_width = opts.width;
     m_height = opts.height;
-    m_player = opts.player;
-    m_opponent = opts.opponent;
     makeGrid();
 }
 
@@ -18,53 +20,107 @@ void Board::makeGrid()
 {
     // resize grid with width & height
     m_grid.resize(m_height);
-    for (auto &row : m_grid)
+    for (auto &row : m_grid) row.resize(m_width);
+
+    for (int y = 0; y < m_height; ++y)
     {
-        row.resize(m_width);
+        for (size_t x = 0; x < m_grid[0].size(); ++x)
+        {
+            m_grid[y][x].setX(x);
+            m_grid[y][x].setY(y);
+        }
     }
 
-    // Place player
-    Cell &playerCell = m_grid[m_player.getY()][m_player.getX()];
-    playerCell.escapeCode = colors::green;
-    playerCell.owner = m_player;
-    // Place opponent
-    Cell &opCell = m_grid[m_opponent.getY()][m_opponent.getX()];
-    opCell.escapeCode = colors::red;
-    opCell.owner = m_opponent;
+    // Place players
+    place(m_player);
+    place(m_opponent);
+}
+
+void Board::place(Player &player)
+{
+    Cell *cell = &m_grid[player.getY()][player.getX()];
+    cell->setOwner(&player);
+    player.addCell(cell);
 }
 
 void Board::nextStep()
 {
-    // get player neighbors
-    std::vector<Cell*> playerNeighbors;
+    // Process both players' turns with probabilistic conquest
+    processPlayerTurn(m_player);
+    processPlayerTurn(m_opponent);
+}
 
-    size_t y = m_player.getY();
-    size_t x = m_player.getX();
+void Board::processPlayerTurn(Player &player)
+{
+    // Find all boundary cells for this player
+    std::vector<Cell *> boundaries = getBoundaryCells(player);
 
-    if (y)
+    // Try to conquer each boundary cell
+    for (Cell *cell : boundaries)
     {
-        playerNeighbors.push_back(&m_grid[y - 1][x]);
-    }
-    if (y < m_grid.size())
-    {
-        playerNeighbors.push_back(&m_grid[y + 1][x]);
-    }
-    if (x)
-    {
-        playerNeighbors.push_back(&m_grid[y][x - 1]);
-    }
-    if (x < m_grid[0].size())
-    {
-        playerNeighbors.push_back(&m_grid[y][x + 1]);
+        if (player.rollExpansion()) cell->setOwner(&player);
     }
 
-    // extend to neighbors
-    for (Cell* cell : playerNeighbors)
+    // Rebuild player's cell list from the grid
+    rebuildPlayerCells(player);
+}
+
+void Board::rebuildPlayerCells(Player &player)
+{
+    std::vector<Cell *> newCells;
+
+    // Scan the entire grid for cells owned by this player
+    for (auto &row : m_grid)
     {
-        cell->owner = m_player;
-        cell->escapeCode = colors::green;
-        std::cout << cell->owner->getName();
+        for (auto &cell : row)
+        {
+            Player* owner = cell.getOwner();
+            if (owner && owner == &player)
+            {
+                newCells.push_back(&cell);
+            }
+        }
     }
+
+    // Update player's cell list (Board is friend of Player)
+    player.m_cells = newCells;
+}
+std::vector<Cell *> Board::getBoundaryCells(Player &player)
+{
+    std::set<Cell *> boundarySet;
+    std::vector<Cell *> playerCells = player.getCells();
+
+    for (Cell *cell : playerCells)
+    {
+        int x{cell->getX()};
+        int y{cell->getY()};
+        // North
+        if (y > 0)
+        {
+            Cell *north = &m_grid[y - 1][x];
+            if (north->getOwner() != &player) boundarySet.insert(north);
+        }
+        // South
+        if (size_t(y) < m_grid.size() - 1)
+        {
+            Cell *south = &m_grid[y + 1][x];
+            if (south->getOwner() != &player) boundarySet.insert(south);
+        }
+        // West
+        if (x > 0)
+        {
+            Cell *west = &m_grid[y][x - 1];
+            if (west->getOwner() != &player) boundarySet.insert(west);
+        }
+        // East
+        if (size_t(x) < m_grid[0].size() - 1)
+        {
+            Cell *east = &m_grid[y][x + 1];
+            if (east->getOwner() != &player) boundarySet.insert(east);
+        }
+    }
+    // Convert set to vector
+    return std::vector<Cell *>(boundarySet.begin(), boundarySet.end());
 }
 
 void Board::prettyPrint()
@@ -73,7 +129,14 @@ void Board::prettyPrint()
     {
         for (auto &cell : row)
         {
-            std::cout << cell.escapeCode;
+            if (cell.getOwner())
+            {
+                std::cout << cell.getOwner()->getColor();
+            }
+            else
+            {
+                std::cout << colors::black;
+            }
         }
         std::cout << '\n';
     }
