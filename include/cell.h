@@ -30,6 +30,7 @@ class Cell
     void setWest(Cell *cell);
 
     bool isSurrounded();
+    Player *m_surroundedBy;
 
   private:
     int m_x;

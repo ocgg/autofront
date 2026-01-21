@@ -25,6 +25,8 @@ class Board
     // Returns all boundary cells (neighbors of player's cells that don't belong to player, without
     // duplicates)
     std::vector<Cell *> getBoundaryCells(Player &player);
+    bool gameIsFinished();
+    Player* getWinner();
 
   private:
     // 2-dimensional array of Cells (vector of vectors of Cells)
@@ -33,6 +35,8 @@ class Board
     int m_height{0};
     Player &m_player;
     Player &m_opponent;
+    bool m_finished;
+    Player* m_winner;
 
     void makeGrid();
     void place(Player &player);
@@ -40,7 +44,7 @@ class Board
     void processPlayerTurn(Player &player);
     // Rebuild player's cell list from the grid
     void rebuildPlayerCells(Player &player);
-    
+    void checkVictory();
 };
 
 #endif

@@ -6,9 +6,11 @@
 #include <ctime>
 #include <iostream>
 #include <set>
+#include <vector>
 
 // Constructor
-Board::Board(BoardOpts &opts) : m_player(opts.player), m_opponent(opts.opponent)
+Board::Board(BoardOpts &opts)
+    : m_player(opts.player), m_opponent(opts.opponent), m_finished(false), m_winner(nullptr)
 {
     m_width = opts.width;
     m_height = opts.height;
@@ -25,11 +27,11 @@ void Board::makeGrid()
     {
         for (int x = 0; size_t(x) < m_grid[0].size(); ++x)
         {
-            Cell* cell = &m_grid[y][x];
+            Cell *cell = &m_grid[y][x];
             cell->setX(x);
             cell->setY(y);
-            cell->setNorth(y > 0 ? &m_grid[y-1][x] : nullptr);
-            cell->setSouth(y < m_height - 1 ? &m_grid[y+1][x] : nullptr);
+            cell->setNorth(y > 0 ? &m_grid[y - 1][x] : nullptr);
+            cell->setSouth(y < m_height - 1 ? &m_grid[y + 1][x] : nullptr);
             cell->setEast(x < m_width - 1 ? &m_grid[y][x + 1] : nullptr);
             cell->setWest(x > 0 ? &m_grid[y][x - 1] : nullptr);
         }
@@ -52,6 +54,13 @@ void Board::nextStep()
     // Process both players' turns with probabilistic conquest
     processPlayerTurn(m_player);
     processPlayerTurn(m_opponent);
+    // check entire board for surrounded cells
+    for (auto &row : m_grid)
+    {
+        for (auto &cell : row)
+            if (cell.isSurrounded()) cell.setOwner(cell.m_surroundedBy);
+    }
+    checkVictory();
 }
 
 void Board::processPlayerTurn(Player &player)
@@ -63,7 +72,6 @@ void Board::processPlayerTurn(Player &player)
     for (Cell *cell : boundaries)
     {
         if (player.rollExpansion()) cell->setOwner(&player);
-        else if (cell->isSurrounded()) cell->setOwner(&player);
     }
 
     // Rebuild player's cell list from the grid
@@ -79,7 +87,7 @@ void Board::rebuildPlayerCells(Player &player)
     {
         for (auto &cell : row)
         {
-            Player* owner = cell.getOwner();
+            Player *owner = cell.getOwner();
             if (owner == &player)
             {
                 newCells.push_back(&cell);
@@ -145,4 +153,26 @@ void Board::prettyPrint()
         }
         std::cout << '\n';
     }
+}
+
+void Board::checkVictory()
+{
+    Player *firstCellOwner = m_grid[0][0].getOwner();
+    for (auto &row : m_grid)
+    {
+        for (Cell cell : row)
+        {
+            if (cell.getOwner() != firstCellOwner) return;
+        }
+    }
+    m_finished = true;
+    m_winner = firstCellOwner;
+}
+
+Player* Board::getWinner() {
+    return m_winner;
+}
+
+bool Board::gameIsFinished() {
+    return m_finished;
 }

@@ -1,13 +1,12 @@
 #include "cell.h"
 
 #include <algorithm>
-#include <set>
 #include <vector>
 
 // Default constructor
 Cell::Cell()
-    : m_x(0), m_y(0), m_owner(nullptr), m_north(nullptr), m_south(nullptr), m_east(nullptr),
-      m_west(nullptr)
+    : m_surroundedBy(nullptr), m_x(0), m_y(0), m_owner(nullptr), m_north(nullptr), m_south(nullptr),
+      m_east(nullptr), m_west(nullptr)
 {
 }
 
@@ -66,9 +65,16 @@ bool Cell::isSurrounded()
 
     if (m_north) neighbors.push_back(m_north);
     if (m_south) neighbors.push_back(m_south);
-    if (m_east)  neighbors.push_back(m_east);
-    if (m_west)  neighbors.push_back(m_west);
+    if (m_east) neighbors.push_back(m_east);
+    if (m_west) neighbors.push_back(m_west);
 
-    return std::all_of(neighbors.begin(), neighbors.end(),
-                       [&](Cell *c) { return c->getOwner() != m_owner; });
+    bool surrounded = std::all_of(neighbors.begin(), neighbors.end(),
+                                  [&](Cell *c) { Player* owner = c->getOwner();
+                                  return (owner && owner != m_owner); });
+    if (surrounded)
+    {
+        m_surroundedBy = neighbors[0]->getOwner();
+        return true;
+    }
+    return false;
 }

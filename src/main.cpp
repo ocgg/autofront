@@ -28,15 +28,15 @@ int main()
     std::cout << opponent.getName() << " cells: " << opponent.getCells().size()
               << " (expansion: " << opponent.getExpansionScore() << "%)\n";
 
-    for (int i = 1; i <= 20; ++i)
+    for (int i = 1; i <= 100; ++i)
     {
         std::cout << "\n=== Turn " << i << " ===\n";
         board.nextStep();
         board.prettyPrint();
-
-        std::cout << player.getName() << " cells: " << player.getCells().size() << "\n";
-        std::cout << opponent.getName() << " cells: " << opponent.getCells().size() << "\n";
+        if (board.gameIsFinished()) break;
     }
+
+    std::cout << board.getWinner()->getName() << "a gagné !" << '\n';
 
     return 0;
 }
