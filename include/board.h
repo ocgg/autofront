@@ -40,6 +40,7 @@ class Board
     void processPlayerTurn(Player &player);
     // Rebuild player's cell list from the grid
     void rebuildPlayerCells(Player &player);
+    
 };
 
 #endif

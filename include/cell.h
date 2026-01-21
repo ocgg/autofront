@@ -15,8 +15,6 @@ class Cell
     };
     // Default constructor
     Cell();
-    // Constructor with options
-    Cell(const CellOpts &opts);
 
     // Getters and setters
     Player *getOwner() const;
@@ -26,12 +24,23 @@ class Cell
     const int &getY() const;
     void setY(int y);
 
+    void setNorth(Cell *cell);
+    void setSouth(Cell *cell);
+    void setEast(Cell *cell);
+    void setWest(Cell *cell);
+
+    bool isSurrounded();
+
   private:
     int m_x;
     int m_y;
     std::string m_color;
     std::string m_escapeCode;
     Player *m_owner;
+    Cell *m_north;
+    Cell *m_south;
+    Cell *m_east;
+    Cell *m_west;
 };
 
 #endif

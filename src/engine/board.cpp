@@ -5,7 +5,6 @@
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
-#include <optional>
 #include <set>
 
 // Constructor
@@ -24,10 +23,15 @@ void Board::makeGrid()
 
     for (int y = 0; y < m_height; ++y)
     {
-        for (size_t x = 0; x < m_grid[0].size(); ++x)
+        for (int x = 0; size_t(x) < m_grid[0].size(); ++x)
         {
-            m_grid[y][x].setX(x);
-            m_grid[y][x].setY(y);
+            Cell* cell = &m_grid[y][x];
+            cell->setX(x);
+            cell->setY(y);
+            cell->setNorth(y > 0 ? &m_grid[y-1][x] : nullptr);
+            cell->setSouth(y < m_height - 1 ? &m_grid[y+1][x] : nullptr);
+            cell->setEast(x < m_width - 1 ? &m_grid[y][x + 1] : nullptr);
+            cell->setWest(x > 0 ? &m_grid[y][x - 1] : nullptr);
         }
     }
 
@@ -59,6 +63,7 @@ void Board::processPlayerTurn(Player &player)
     for (Cell *cell : boundaries)
     {
         if (player.rollExpansion()) cell->setOwner(&player);
+        else if (cell->isSurrounded()) cell->setOwner(&player);
     }
 
     // Rebuild player's cell list from the grid
@@ -75,7 +80,7 @@ void Board::rebuildPlayerCells(Player &player)
         for (auto &cell : row)
         {
             Player* owner = cell.getOwner();
-            if (owner && owner == &player)
+            if (owner == &player)
             {
                 newCells.push_back(&cell);
             }
